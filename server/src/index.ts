@@ -24,9 +24,9 @@ app.get("/api/health", (_req, res) => {
   res.json({ ok: true });
 });
 
-async function startServer() {
+async function startServer(uri: string) {
   try {
-    await mongoose.connect(MONGODB_URI);
+    await mongoose.connect(uri);
     console.log("connected to mongodb");
 
     app.listen(PORT, () => {
@@ -38,4 +38,4 @@ async function startServer() {
   }
 }
 
-startServer();
+startServer(MONGODB_URI);
