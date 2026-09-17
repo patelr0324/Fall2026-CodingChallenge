@@ -40,3 +40,6 @@ friendship (not mvp):
 - fromUser (objectId)
 - toUser (objectId)
 - status (string)
+
+
+ui inspiration: https://galekto.com/

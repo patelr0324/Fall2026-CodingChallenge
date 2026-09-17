@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
+import authRoutes from "./routes/auth";
 
 const app = express();
 
@@ -10,6 +11,10 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
   throw new Error("MONGODB_URI is not defined");
+}
+
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is not defined");
 }
 
 app.use(
@@ -23,6 +28,8 @@ app.use(express.json());
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true });
 });
+
+app.use("/api/auth", authRoutes);
 
 async function startServer(uri: string) {
   try {
