@@ -20,6 +20,7 @@ type ImageCardProps = {
   saved?: boolean
 }
 
+/**  pin card — lazy-loads images; action buttons only when handlers are passed. */
 export const ImageCard = memo(function ImageCard({
   image,
   onSave,

@@ -3,6 +3,7 @@ import { Collection } from "../models/Collection";
 import { CollectionItem } from "../models/CollectionItem";
 import { User } from "../models/User";
 
+/** Public board views (no auth needed) */
 const router = Router();
 
 function publicSave(doc: {

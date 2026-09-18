@@ -21,6 +21,7 @@ type ColorFilterDropdownProps = {
   onChange: (value: string) => void
 }
 
+/** color chips for Pixabay's `colors` query param (native select was unreadable). */
 export function ColorFilterDropdown({
   value,
   onChange,

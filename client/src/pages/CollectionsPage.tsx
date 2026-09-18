@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useState, type SubmitEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { notifications } from '@mantine/notifications'
 import { api } from '../api/client'
@@ -14,6 +14,7 @@ export type CollectionSummary = {
   collaboratorIds: string[]
 }
 
+/** list + create boards (library is always first) */
 export function CollectionsPage() {
   const { user, loading: authLoading } = useAuth()
   const [collections, setCollections] = useState<CollectionSummary[]>([])
@@ -46,7 +47,7 @@ export function CollectionsPage() {
     void load()
   }, [user, load])
 
-  async function onCreate(e: FormEvent) {
+  async function onCreate(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     const next = title.trim()
     if (!next) return

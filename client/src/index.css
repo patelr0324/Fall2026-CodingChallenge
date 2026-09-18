@@ -734,6 +734,63 @@ a {
   margin-top: 2rem;
 }
 
+.lumen-friends-menu {
+  margin-top: 1.75rem;
+  max-width: 560px;
+}
+
+.lumen-friends-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+
+.lumen-friends-tab {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.lumen-friends-tab:hover {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.lumen-friends-tab.is-active {
+  color: var(--ink);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.lumen-friends-panel {
+  margin-top: 0.9rem;
+  padding: 0.95rem 1rem 1.05rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+.lumen-friends-panel .lumen-discover-search {
+  margin-top: 0;
+}
+
+.lumen-friends-panel .lumen-friends-list {
+  margin-top: 0.75rem;
+}
+
+.lumen-friends-panel .lumen-modal-hint {
+  margin: 0.55rem 0 0;
+}
+
 .lumen-friends-list {
   list-style: none;
   margin: 0.65rem 0 0;
@@ -757,6 +814,26 @@ a {
   text-transform: lowercase;
 }
 
+.lumen-friends-row.is-selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.lumen-friends-name {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.lumen-friends-name:hover {
+  color: var(--accent);
+}
+
 .lumen-friends-actions {
   display: flex;
   flex-wrap: wrap;
@@ -772,6 +849,32 @@ a {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+.lumen-friends-boards-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.lumen-friends-boards-head .lumen-settings-label {
+  margin: 0;
+}
+
+.lumen-friends-clear {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.78rem;
+  text-transform: lowercase;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+  padding: 0;
 }
 
 .lumen-scroll-status {

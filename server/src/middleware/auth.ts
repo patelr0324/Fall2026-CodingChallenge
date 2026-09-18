@@ -21,6 +21,7 @@ export function signToken(payload: AuthPayload): string {
   return jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
 }
 
+/** require `Authorization: Bearer <jwt>` and attach `req.auth.userId` */
 export function requireAuth(
   req: AuthedRequest,
   res: Response,

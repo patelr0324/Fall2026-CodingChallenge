@@ -7,7 +7,7 @@ const navItems = [
   { to: '/friends', label: 'friends' },
 ] as const
 
-/** decorative center bits — not navigation */
+/**  decorative center bits (not navigation) */
 function BitSpark() {
   return (
     <svg className="lumen-bit-svg" width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>

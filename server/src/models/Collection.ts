@@ -19,13 +19,13 @@ const collectionSchema = new Schema(
       enum: ["private", "public"],
       default: "private",
     },
-    /** system “Library” board — cannot rename/delete */
+    /** library board (cannot rename/delete/share; its basically quick saves) */
     isLibrary: {
       type: Boolean,
       default: false,
       index: true,
     },
-    /** set when sharing is enabled (step 5) */
+    /** unique token for public URL `/b/:shareSlug` */
     shareSlug: {
       type: String,
       trim: true,

@@ -1,4 +1,4 @@
-import { memo, useState, type FormEvent } from 'react'
+import { memo, useState, type SubmitEvent } from 'react'
 import { ColorFilterDropdown } from './ColorFilterDropdown'
 
 type DiscoverSearchBarProps = {
@@ -19,7 +19,7 @@ export const DiscoverSearchBar = memo(function DiscoverSearchBar({
 }: DiscoverSearchBarProps) {
   const [draft, setDraft] = useState(initialQuery)
 
-  function handleSubmit(e: FormEvent) {
+  function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     onSearch(draft.trim())
   }

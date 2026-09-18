@@ -24,6 +24,7 @@ type PublicItem = {
   }
 }
 
+/** unauthenticated view of a public board via share slug */
 export function PublicBoardPage() {
   const { shareSlug } = useParams<{ shareSlug: string }>()
   const [board, setBoard] = useState<PublicBoard | null>(null)

@@ -20,6 +20,7 @@ type DiscoverResponse = {
   hasMore: boolean
 }
 
+/** pixabay browse: infinite scroll, pin to library or board. */
 export function DiscoverPage() {
   const { user } = useAuth()
   const [query, setQuery] = useState('')

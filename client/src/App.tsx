@@ -9,6 +9,7 @@ import { ProfilePage } from './pages/ProfilePage'
 import { PublicBoardPage } from './pages/PublicBoardPage'
 import { RegisterPage } from './pages/RegisterPage'
 
+/** app routes. public share live at `/b/:shareSlug` (no login required) */
 function App() {
   return (
     <Routes>

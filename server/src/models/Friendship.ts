@@ -1,5 +1,6 @@
 import mongoose, { Schema, type InferSchemaType } from "mongoose";
 
+/** friendship pending until recipient accepts or sender cancels */
 const friendshipSchema = new Schema(
   {
     requesterId: {

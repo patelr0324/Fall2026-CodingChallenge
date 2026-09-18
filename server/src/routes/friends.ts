@@ -6,6 +6,7 @@ import { User } from "../models/User";
 import { Collection } from "../models/Collection";
 import { requireAuth, type AuthedRequest } from "../middleware/auth";
 
+/** friend graph: search, pending requests, accept/cancel, friends' public boards */
 const router = Router();
 
 const requestSchema = z.object({

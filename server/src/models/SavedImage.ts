@@ -1,5 +1,6 @@
 import mongoose, { Schema, type InferSchemaType } from "mongoose";
 
+/** Deduped Pixabay image per user — boards reference these via CollectionItem. */
 const savedImageSchema = new Schema(
   {
     ownerId: {

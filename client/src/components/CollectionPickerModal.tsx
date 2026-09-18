@@ -19,6 +19,7 @@ type CollectionPickerModalProps = {
   onClose: () => void
 }
 
+/** to pick/create a collection when saving/moving an image. */
 export function CollectionPickerModal({
   title,
   collections,

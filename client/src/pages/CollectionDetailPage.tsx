@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type SubmitEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { notifications } from '@mantine/notifications'
 import { api } from '../api/client'
@@ -28,6 +28,7 @@ type Collaborator = {
   username: string
 }
 
+/** board detail: masonry items, share/visibility, collaborators, move/remove */
 export function CollectionDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -105,7 +106,7 @@ export function CollectionDetailPage() {
     void load()
   }, [user, load])
 
-  async function onRename(e: FormEvent) {
+  async function onRename(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!id || !collection || isLibrary) return
     const next = titleDraft.trim()
@@ -222,7 +223,7 @@ export function CollectionDetailPage() {
     }
   }
 
-  async function onInvite(e: FormEvent) {
+  async function onInvite(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!id) return
     const username = inviteUsername.trim().toLowerCase()

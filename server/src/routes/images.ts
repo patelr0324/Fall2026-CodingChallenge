@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 
+/** Pixabay proxy */
 const router = Router();
 
 const PIXABAY_COLORS = [

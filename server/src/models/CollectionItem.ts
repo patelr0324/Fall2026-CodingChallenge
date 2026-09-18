@@ -1,5 +1,6 @@
 import mongoose, { Schema, type InferSchemaType } from "mongoose";
 
+/** join between a Collection and a SavedImage (with display order) */
 const collectionItemSchema = new Schema(
   {
     collectionId: {

@@ -8,6 +8,10 @@ import imagesRoutes from "./routes/images";
 import publicRoutes from "./routes/public";
 import friendsRoutes from "./routes/friends";
 
+/**
+ * lumen API w/ Express + Mongo.
+ * Client (Vite) proxies /api here in dev; set CLIENT_ORIGIN / MONGODB_URI / JWT_SECRET / PIXABAY_API_KEY.
+ */
 const app = express();
 
 const PORT = process.env.PORT || 3001;

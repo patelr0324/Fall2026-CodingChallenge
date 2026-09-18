@@ -1,5 +1,6 @@
 import mongoose, { Schema, type InferSchemaType } from "mongoose";
 
+/** password stored as bcrypt hash */
 const userSchema = new Schema(
   {
     username: {

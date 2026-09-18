@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useState, type SubmitEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { notifications } from '@mantine/notifications'
 import { api } from '../api/client'
@@ -30,6 +30,9 @@ type FriendBoard = {
   ownerUsername: string
 }
 
+type ManageTab = 'find' | 'incoming' | 'outgoing'
+
+/** friend requests + filterable feed of friends' public boards. */
 export function FriendsPage() {
   const { user, loading: authLoading } = useAuth()
   const [friends, setFriends] = useState<FriendUser[]>([])
@@ -37,6 +40,9 @@ export function FriendsPage() {
   const [outgoing, setOutgoing] = useState<OutgoingRequest[]>([])
   const [boards, setBoards] = useState<FriendBoard[]>([])
   const [loading, setLoading] = useState(true)
+
+  const [manageTab, setManageTab] = useState<ManageTab | null>(null)
+  const [boardFilter, setBoardFilter] = useState<string | null>(null)
 
   const [draft, setDraft] = useState('')
   const [results, setResults] = useState<SearchUser[]>([])
@@ -76,7 +82,11 @@ export function FriendsPage() {
     void load()
   }, [user, load])
 
-  async function onSearch(e: FormEvent) {
+  const filteredBoards = boardFilter
+    ? boards.filter((b) => b.ownerUsername === boardFilter)
+    : boards
+
+  async function onSearch(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     const q = draft.trim().toLowerCase()
     if (!q) {
@@ -112,6 +122,7 @@ export function FriendsPage() {
         notifications.show({ color: 'teal', message: `now friends with @${username}` })
       } else {
         notifications.show({ color: 'teal', message: `request sent to @${username}` })
+        setManageTab('outgoing')
       }
       setResults((prev) =>
         prev.map((u) =>
@@ -195,6 +206,7 @@ export function FriendsPage() {
       await api(`/api/friends/${friendId}`, { method: 'DELETE' })
       setFriends((prev) => prev.filter((f) => f.id !== friendId))
       setBoards((prev) => prev.filter((b) => b.ownerUsername !== username))
+      if (boardFilter === username) setBoardFilter(null)
       notifications.show({ color: 'teal', message: `unfriended @${username}` })
     } catch (err) {
       notifications.show({
@@ -204,6 +216,14 @@ export function FriendsPage() {
     } finally {
       setBusyKey(null)
     }
+  }
+
+  function toggleManageTab(tab: ManageTab) {
+    setManageTab((prev) => (prev === tab ? null : tab))
+  }
+
+  function toggleBoardFilter(username: string) {
+    setBoardFilter((prev) => (prev === username ? null : username))
   }
 
   if (authLoading) {
@@ -239,58 +259,93 @@ export function FriendsPage() {
         social
       </h1>
       <p className="lumen-page-blurb">
-        search users, accept requests, and browse friends&apos; public boards.
+        manage requests, then tap a friend to filter their public boards.
       </p>
 
-      <form className="lumen-discover-search" onSubmit={onSearch}>
-        <label className="lumen-field lumen-discover-field">
-          <span>find people</span>
-          <input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="username…"
-            autoComplete="off"
-          />
-        </label>
-        <button className="lumen-btn lumen-btn-sm" type="submit" disabled={searching}>
-          {searching ? 'searching…' : 'search'}
-        </button>
-      </form>
-
-      {results.length > 0 ? (
-        <div className="lumen-friends-section">
-          <p className="lumen-settings-label">results</p>
-          <ul className="lumen-friends-list">
-            {results.map((u) => (
-              <li key={u.id} className="lumen-friends-row">
-                <span>@{u.username}</span>
-                {u.relation === 'none' ? (
-                  <button
-                    type="button"
-                    className="lumen-btn lumen-btn-sm"
-                    disabled={busyKey === `req:${u.username}`}
-                    onClick={() => void sendRequest(u.username)}
-                  >
-                    add
-                  </button>
-                ) : (
-                  <span className="lumen-friends-status">{u.relation}</span>
-                )}
-              </li>
-            ))}
-          </ul>
+      <div className="lumen-friends-menu">
+        <p className="lumen-settings-label">manage</p>
+        <div className="lumen-friends-tabs" role="tablist" aria-label="manage friends">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={manageTab === 'find'}
+            className={`lumen-friends-tab${manageTab === 'find' ? ' is-active' : ''}`}
+            onClick={() => toggleManageTab('find')}
+          >
+            find
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={manageTab === 'incoming'}
+            className={`lumen-friends-tab${manageTab === 'incoming' ? ' is-active' : ''}`}
+            onClick={() => toggleManageTab('incoming')}
+          >
+            incoming
+            {incoming.length > 0 ? ` (${incoming.length})` : ''}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={manageTab === 'outgoing'}
+            className={`lumen-friends-tab${manageTab === 'outgoing' ? ' is-active' : ''}`}
+            onClick={() => toggleManageTab('outgoing')}
+          >
+            outgoing
+            {outgoing.length > 0 ? ` (${outgoing.length})` : ''}
+          </button>
         </div>
-      ) : null}
 
-      {loading ? (
-        <p className="lumen-page-blurb">loading friends…</p>
-      ) : (
-        <>
-          <div className="lumen-friends-section">
-            <p className="lumen-settings-label">
-              incoming {incoming.length > 0 ? `(${incoming.length})` : ''}
-            </p>
-            {incoming.length === 0 ? (
+        {manageTab ? (
+        <div className="lumen-friends-panel">
+          {manageTab === 'find' ? (
+            <>
+              <form className="lumen-discover-search" onSubmit={onSearch}>
+                <label className="lumen-field lumen-discover-field">
+                  <span>username</span>
+                  <input
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    placeholder="username…"
+                    autoComplete="off"
+                  />
+                </label>
+                <button
+                  className="lumen-btn lumen-btn-sm"
+                  type="submit"
+                  disabled={searching}
+                >
+                  {searching ? 'searching…' : 'search'}
+                </button>
+              </form>
+              {results.length === 0 ? (
+                <p className="lumen-modal-hint">search by username to send a request.</p>
+              ) : (
+                <ul className="lumen-friends-list">
+                  {results.map((u) => (
+                    <li key={u.id} className="lumen-friends-row">
+                      <span>@{u.username}</span>
+                      {u.relation === 'none' ? (
+                        <button
+                          type="button"
+                          className="lumen-btn lumen-btn-sm"
+                          disabled={busyKey === `req:${u.username}`}
+                          onClick={() => void sendRequest(u.username)}
+                        >
+                          add
+                        </button>
+                      ) : (
+                        <span className="lumen-friends-status">{u.relation}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          ) : null}
+
+          {manageTab === 'incoming' ? (
+            incoming.length === 0 ? (
               <p className="lumen-modal-hint">no pending requests.</p>
             ) : (
               <ul className="lumen-friends-list">
@@ -318,14 +373,11 @@ export function FriendsPage() {
                   </li>
                 ))}
               </ul>
-            )}
-          </div>
+            )
+          ) : null}
 
-          <div className="lumen-friends-section">
-            <p className="lumen-settings-label">
-              outgoing {outgoing.length > 0 ? `(${outgoing.length})` : ''}
-            </p>
-            {outgoing.length === 0 ? (
+          {manageTab === 'outgoing' ? (
+            outgoing.length === 0 ? (
               <p className="lumen-modal-hint">no sent requests.</p>
             ) : (
               <ul className="lumen-friends-list">
@@ -343,45 +395,87 @@ export function FriendsPage() {
                   </li>
                 ))}
               </ul>
-            )}
-          </div>
+            )
+          ) : null}
+        </div>
+        ) : null}
+      </div>
 
+      {loading ? (
+        <p className="lumen-page-blurb">loading friends…</p>
+      ) : (
+        <>
           <div className="lumen-friends-section">
             <p className="lumen-settings-label">
               friends {friends.length > 0 ? `(${friends.length})` : ''}
             </p>
             {friends.length === 0 ? (
               <p className="lumen-modal-hint">
-                no friends yet — search a username above.
+                no friends yet — open find above to search.
               </p>
             ) : (
               <ul className="lumen-friends-list">
-                {friends.map((f) => (
-                  <li key={f.id} className="lumen-friends-row">
-                    <span>@{f.username}</span>
-                    <button
-                      type="button"
-                      className="lumen-btn lumen-btn-sm lumen-btn-danger-outline"
-                      disabled={busyKey === `unfriend:${f.id}`}
-                      onClick={() => void unfriend(f.id, f.username)}
+                {friends.map((f) => {
+                  const active = boardFilter === f.username
+                  return (
+                    <li
+                      key={f.id}
+                      className={`lumen-friends-row${active ? ' is-selected' : ''}`}
                     >
-                      unfriend
-                    </button>
-                  </li>
-                ))}
+                      <button
+                        type="button"
+                        className="lumen-friends-name"
+                        onClick={() => toggleBoardFilter(f.username)}
+                        aria-pressed={active}
+                        title={
+                          active
+                            ? 'show all boards'
+                            : `show @${f.username}'s boards`
+                        }
+                      >
+                        @{f.username}
+                      </button>
+                      <button
+                        type="button"
+                        className="lumen-btn lumen-btn-sm lumen-btn-danger-outline"
+                        disabled={busyKey === `unfriend:${f.id}`}
+                        onClick={() => void unfriend(f.id, f.username)}
+                      >
+                        unfriend
+                      </button>
+                    </li>
+                  )
+                })}
               </ul>
             )}
           </div>
 
           <div className="lumen-friends-section">
-            <p className="lumen-settings-label">friends&apos; public boards</p>
-            {boards.length === 0 ? (
+            <div className="lumen-friends-boards-head">
+              <p className="lumen-settings-label">
+                {boardFilter
+                  ? `@${boardFilter}'s public boards`
+                  : "friends' public boards"}
+              </p>
+              {boardFilter ? (
+                <button
+                  type="button"
+                  className="lumen-friends-clear"
+                  onClick={() => setBoardFilter(null)}
+                >
+                  show all
+                </button>
+              ) : null}
+            </div>
+            {filteredBoards.length === 0 ? (
               <p className="lumen-modal-hint">
-                when friends share a board publicly, it shows up here.
+                {boardFilter
+                  ? `@${boardFilter} has no public boards yet.`
+                  : 'when friends share a board publicly, it shows up here.'}
               </p>
             ) : (
               <div className="lumen-board-grid">
-                {boards.map((board) => (
+                {filteredBoards.map((board) => (
                   <Link
                     key={board.id}
                     to={

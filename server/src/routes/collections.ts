@@ -9,6 +9,10 @@ import { User } from "../models/User";
 import { requireAuth, type AuthedRequest } from "../middleware/auth";
 import { ensureLibrary } from "../services/library";
 
+/**
+ * authenticated board CRUD, items, share links, and collaborator invites.
+ * owner or collaborator may edit items; only owner manages share/collab/delete.
+ */
 const router = Router();
 
 const createSchema = z.object({
@@ -124,6 +128,7 @@ function isOwner(
   return collection.ownerId.toString() === userId;
 }
 
+/** Upsert a SavedImage for this user (by pixabayId) or load an existing save. */
 async function resolveSavedImage(
   userId: string,
   data: z.infer<typeof addItemSchema>
