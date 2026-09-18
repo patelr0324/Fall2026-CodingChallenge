@@ -5,7 +5,6 @@ const navItems = [
   { to: '/discover', label: 'discover' },
   { to: '/collections', label: 'collections' },
   { to: '/friends', label: 'friends' },
-  { to: '/settings', label: 'settings' },
 ] as const
 
 /** decorative center bits — not navigation */

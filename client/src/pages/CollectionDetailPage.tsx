@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { notifications } from '@mantine/notifications'
 import { api } from '../api/client'
@@ -58,6 +58,7 @@ export function CollectionDetailPage() {
   const isOwner = !!(user && collection && collection.ownerId === user.id)
   const isLibrary = !!collection?.isLibrary
   const canEdit = !!(user && collection && (isOwner || collection.collaboratorIds.includes(user.id)))
+  const hasContentRef = useRef(false)
 
   const shareUrl =
     collection?.shareSlug && typeof window !== 'undefined'
@@ -66,7 +67,7 @@ export function CollectionDetailPage() {
 
   const load = useCallback(async () => {
     if (!id) return
-    setLoading(true)
+    if (!hasContentRef.current) setLoading(true)
     setError(null)
     try {
       const data = await api<{
@@ -78,14 +79,22 @@ export function CollectionDetailPage() {
       setItems(data.items)
       setCollaborators(data.collaborators ?? [])
       setTitleDraft(data.collection.title)
+      hasContentRef.current = true
     } catch (err) {
       setCollection(null)
       setItems([])
       setCollaborators([])
+      hasContentRef.current = false
       setError(err instanceof Error ? err.message : 'could not load board')
     } finally {
       setLoading(false)
     }
+  }, [id])
+
+  useEffect(() => {
+    hasContentRef.current = false
+    setCollection(null)
+    setItems([])
   }, [id])
 
   useEffect(() => {
@@ -143,6 +152,10 @@ export function CollectionDetailPage() {
   async function onShare() {
     if (!id) return
     setSharingBusy(true)
+    const prev = collection
+    setCollection((c) =>
+      c ? { ...c, visibility: 'public' } : c,
+    )
     try {
       const data = await api<{
         collection: CollectionSummary
@@ -152,11 +165,12 @@ export function CollectionDetailPage() {
       const url = `${window.location.origin}${data.sharePath}`
       try {
         await navigator.clipboard.writeText(url)
-        notifications.show({ color: 'teal', message: 'public link copied' })
+        notifications.show({ color: 'teal', message: 'public · link copied' })
       } catch {
-        notifications.show({ color: 'teal', message: `shared: ${url}` })
+        notifications.show({ color: 'teal', message: `public · ${url}` })
       }
     } catch (err) {
+      if (prev) setCollection(prev)
       notifications.show({
         color: 'red',
         message: err instanceof Error ? err.message : 'share failed',
@@ -169,14 +183,19 @@ export function CollectionDetailPage() {
   async function onUnshare() {
     if (!id) return
     setSharingBusy(true)
+    const prev = collection
+    setCollection((c) =>
+      c ? { ...c, visibility: 'private' } : c,
+    )
     try {
       const data = await api<{ collection: CollectionSummary }>(
         `/api/collections/${id}/unshare`,
         { method: 'POST' },
       )
       setCollection(data.collection)
-      notifications.show({ color: 'teal', message: 'board is private again' })
+      notifications.show({ color: 'teal', message: 'board is private' })
     } catch (err) {
+      if (prev) setCollection(prev)
       notifications.show({
         color: 'red',
         message: err instanceof Error ? err.message : 'unshare failed',
@@ -184,6 +203,13 @@ export function CollectionDetailPage() {
     } finally {
       setSharingBusy(false)
     }
+  }
+
+  async function onVisibilityChange(next: 'private' | 'public') {
+    if (!collection || sharingBusy) return
+    if (next === collection.visibility) return
+    if (next === 'public') await onShare()
+    else await onUnshare()
   }
 
   async function onCopyLink() {
@@ -249,16 +275,19 @@ export function CollectionDetailPage() {
 
   async function onRemove(image: DiscoverImage & { savedImageId?: string }) {
     if (!id || !image.savedImageId) return
+    const savedImageId = image.savedImageId
+    const snapshot = items
     setBusyId(image.pixabayId)
+    setItems((prev) =>
+      prev.filter((item) => item.savedImage.id !== savedImageId),
+    )
     try {
-      await api(`/api/collections/${id}/items/${image.savedImageId}`, {
+      await api(`/api/collections/${id}/items/${savedImageId}`, {
         method: 'DELETE',
       })
-      setItems((prev) =>
-        prev.filter((item) => item.savedImage.id !== image.savedImageId),
-      )
       notifications.show({ color: 'teal', message: 'removed from board' })
     } catch (err) {
+      setItems(snapshot)
       notifications.show({
         color: 'red',
         message: err instanceof Error ? err.message : 'remove failed',
@@ -297,7 +326,14 @@ export function CollectionDetailPage() {
 
   async function confirmMove() {
     if (!id || !moveImageId) return
+    const movingId = moveImageId
+    const snapshot = items
     setBusyId(movePixabayId)
+    setItems((prev) =>
+      prev.filter((item) => item.savedImage.id !== movingId),
+    )
+    setMoveOpen(false)
+
     try {
       let toCollectionId = moveToId
       const createdTitle = moveNewTitle.trim()
@@ -317,22 +353,19 @@ export function CollectionDetailPage() {
         throw new Error('pick a board or name a new one')
       }
 
-      await api(`/api/collections/${id}/items/${moveImageId}/move`, {
+      await api(`/api/collections/${id}/items/${movingId}/move`, {
         method: 'POST',
         body: JSON.stringify({ toCollectionId }),
       })
-      setItems((prev) =>
-        prev.filter((item) => item.savedImage.id !== moveImageId),
-      )
       notifications.show({
         color: 'teal',
         message: createdTitle ? 'board created and image moved' : 'moved to board',
       })
-      setMoveOpen(false)
       setMoveImageId(null)
       setMovePixabayId(null)
       setMoveNewTitle('')
     } catch (err) {
+      setItems(snapshot)
       notifications.show({
         color: 'red',
         message: err instanceof Error ? err.message : 'move failed',
@@ -464,35 +497,47 @@ export function CollectionDetailPage() {
               >
                 rename
               </button>
+
+              <div
+                className="lumen-visibility"
+                role="group"
+                aria-label="visibility"
+              >
+                <button
+                  type="button"
+                  className="lumen-visibility-btn"
+                  data-active={
+                    collection.visibility === 'private' ? 'true' : 'false'
+                  }
+                  disabled={sharingBusy}
+                  onClick={() => void onVisibilityChange('private')}
+                >
+                  private
+                </button>
+                <button
+                  type="button"
+                  className="lumen-visibility-btn"
+                  data-active={
+                    collection.visibility === 'public' ? 'true' : 'false'
+                  }
+                  disabled={sharingBusy}
+                  onClick={() => void onVisibilityChange('public')}
+                >
+                  public
+                </button>
+              </div>
+
               {collection.visibility === 'public' ? (
-                <>
-                  <button
-                    type="button"
-                    className="lumen-btn lumen-btn-sm"
-                    onClick={() => void onCopyLink()}
-                    disabled={!shareUrl}
-                  >
-                    copy link
-                  </button>
-                  <button
-                    type="button"
-                    className="lumen-btn lumen-btn-sm"
-                    onClick={() => void onUnshare()}
-                    disabled={sharingBusy}
-                  >
-                    make private
-                  </button>
-                </>
-              ) : (
                 <button
                   type="button"
                   className="lumen-btn lumen-btn-sm"
-                  onClick={() => void onShare()}
-                  disabled={sharingBusy}
+                  onClick={() => void onCopyLink()}
+                  disabled={!shareUrl}
                 >
-                  {sharingBusy ? 'sharing…' : 'share'}
+                  copy link
                 </button>
-              )}
+              ) : null}
+
               <button
                 type="button"
                 className="lumen-btn lumen-btn-sm"

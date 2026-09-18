@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 export type DiscoverImage = {
   pixabayId: string
   imageUrl: string
@@ -15,15 +17,17 @@ type ImageCardProps = {
   onMove?: (image: DiscoverImage) => void
   onRemove?: (image: DiscoverImage) => void
   saving?: boolean
+  saved?: boolean
 }
 
-export function ImageCard({
+export const ImageCard = memo(function ImageCard({
   image,
   onSave,
   onSaveToCollection,
   onMove,
   onRemove,
   saving = false,
+  saved = false,
 }: ImageCardProps) {
   const label = image.tags.split(',')[0]?.trim() || 'untitled'
   const ratio =
@@ -37,9 +41,11 @@ export function ImageCard({
     <article className="lumen-pin">
       <div className="lumen-pin-media" style={{ aspectRatio: String(ratio) }}>
         <img
+          className="lumen-pin-img"
           src={image.previewUrl || image.imageUrl}
           alt={image.tags || 'pixabay image'}
           loading="lazy"
+          decoding="async"
         />
         {hasActions ? (
           <div className="lumen-pin-actions">
@@ -47,10 +53,10 @@ export function ImageCard({
               <button
                 type="button"
                 className="lumen-pin-btn"
-                disabled={saving}
+                disabled={saving || saved}
                 onClick={() => onSave(image)}
               >
-                save
+                {saved ? 'saved' : 'save'}
               </button>
             ) : null}
             {onSaveToCollection ? (
@@ -94,4 +100,4 @@ export function ImageCard({
       </div>
     </article>
   )
-}
+})

@@ -114,5 +114,3 @@ export function ColorFilterDropdown({
     </div>
   )
 }
-
-export { COLOR_OPTIONS }

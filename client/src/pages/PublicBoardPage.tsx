@@ -106,8 +106,7 @@ export function PublicBoardPage() {
           )}
         </h1>
         <p className="lumen-page-blurb">
-          {items.length} {items.length === 1 ? 'image' : 'images'} · public
-          view · <Link to="/register">join lumen</Link> to make your own
+          {items.length} {items.length === 1 ? 'image' : 'images'} · public view
         </p>
       </div>
 

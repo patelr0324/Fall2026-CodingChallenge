@@ -8,7 +8,6 @@ import { LoginPage } from './pages/LoginPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { PublicBoardPage } from './pages/PublicBoardPage'
 import { RegisterPage } from './pages/RegisterPage'
-import { SettingsPage } from './pages/SettingsPage'
 
 function App() {
   return (
@@ -20,7 +19,7 @@ function App() {
         <Route path="collections/:id" element={<CollectionDetailPage />} />
         <Route path="b/:shareSlug" element={<PublicBoardPage />} />
         <Route path="friends" element={<FriendsPage />} />
-        <Route path="settings" element={<SettingsPage />} />
+        <Route path="settings" element={<Navigate to="/profile" replace />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
