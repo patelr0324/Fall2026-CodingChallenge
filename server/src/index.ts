@@ -3,6 +3,10 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import authRoutes from "./routes/auth";
+import savesRoutes from "./routes/saves";
+import collectionsRoutes from "./routes/collections";
+import imagesRoutes from "./routes/images";
+import publicRoutes from "./routes/public";
 
 const app = express();
 
@@ -30,6 +34,10 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/saves", savesRoutes);
+app.use("/api/collections", collectionsRoutes);
+app.use("/api/images", imagesRoutes);
+app.use("/api/public", publicRoutes);
 
 async function startServer(uri: string) {
   try {

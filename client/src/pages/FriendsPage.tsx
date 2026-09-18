@@ -5,7 +5,7 @@ export function FriendsPage() {
     <PlaceholderPage
       outline="stay"
       solid="social"
-      blurb="search users, manage requests, and view friends' posted collages."
+      blurb="search users, manage requests, and browse friends' shared collections."
     />
   )
 }
