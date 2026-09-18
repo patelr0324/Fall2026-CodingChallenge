@@ -21,9 +21,10 @@ Tech stack:
 
 Repo layout:
   README.md              — challenge instructions
-  README.txt             — this ColorFilterDropdown
+  README.txt             — this file
 
   client/                — React frontend (dev: http://localhost:5173)
+    .env.example         — notes (no required client secrets; API via proxy)
     vite.config.ts       — Vite config; proxies /api → :3001
     src/
       main.tsx           — app entry (Mantine + router + auth)
@@ -38,7 +39,8 @@ Repo layout:
                            PublicBoard, Friends, Login, Register, Profile
 
   server/                — Express API (dev: http://localhost:3001)
-    .env                 — secrets (Mongo, JWT, Pixabay)
+    .env.example         — sample env vars (copy to .env)
+    .env                 — secrets (not committed): Mongo, JWT, Pixabay
     src/
       index.ts           — server entry, CORS, mounts /api routes
       middleware/        — JWT requireAuth
@@ -59,7 +61,7 @@ prereqs:
 1) backend
    cd server
    npm install
-   Create a file named .env in server/ with:
+   copy .env.example to .env and fill in:
 
      MONGODB_URI=mongodb://127.0.0.1:27017/lumen
      JWT_SECRET=any-long-random-string
